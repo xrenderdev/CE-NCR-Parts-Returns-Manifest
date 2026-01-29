@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Return Form – Auto Date, Cut in Half (Fixed Signature)</title>
+
+<style>
+@page { size: A4; margin: 0; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+  background: #fff;
+}
+
+/* ===== A4 SHEET ===== */
+.sheet {
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ===== CUT LINE ===== */
+.cutline {
+  position: absolute;
+  top: 148.5mm;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed #000;
+}
+
+/* ===== TWO HALVES ===== */
+.half {
+  width: 100%;
+  height: 148.5mm;
+  padding: 6mm;
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  display: flex;
+}
+.half.top { top: 0; }
+.half.bottom { top: 148.5mm; }
+
+/* ===== FORM ===== */
+.form {
+  width: 100%;
+  height: 100%;
+  border: 2px solid #000;
+  padding: 5mm;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4mm;
+}
+
+/* ===== HEADER ===== */
+.header-box {
+  border: 1px solid #000;
+  padding: 3mm;
+  display: grid;
+  grid-template-columns: 20mm 1fr;
+  column-gap: 6mm;
+}
+
+.header-labels {
+  font-size: 11pt;
+  font-weight: bold;
+  line-height: 1.6;
+}
+
+.header-fields {
+  display: grid;
+  row-gap: 2mm;
+}
+
+.header-fields input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 11pt;
+  width: 100%;
+}
+
+/* ===== TABLE ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 10pt;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 1.2mm;
+}
+
+thead th {
+  font-weight: bold;
+  text-align: left;
+}
+
+td.no {
+  text-align: center;
+  font-weight: bold;
+}
+
+td input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 10pt;
+}
+
+/* Column widths */
+col.c-no   { width: 10mm; }
+col.c-ce   { width: 22mm; }
+col.c-part { width: 42mm; }
+col.c-qty  { width: 16mm; }
+col.c-rico { width: 24mm; }
+col.c-awb  { width: 26mm; }
+col.c-child{ width: auto; }
+
+/* ===== SIGNATURE (FIXED) ===== */
+.footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+}
+
+.sig-label {
+  font-size: 10.5pt;
+  font-weight: bold;
+}
+
+.sigbox {
+  height: 16mm;              /* FIXED height safe from cut line */
+  border: 1px solid #000;
+  padding: 2mm;
+  box-sizing: border-box;
+}
+
+.sigbox input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 11pt;
+}
+
+/* Screen preview only */
+@media screen {
+  body { padding: 10px; background: #f3f3f3; }
+  .sheet { box-shadow: 0 0 12px rgba(0,0,0,.2); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sheet">
+  <div class="cutline"></div>
+
+  <div class="half top" id="topHalf"></div>
+  <div class="half bottom" id="bottomHalf"></div>
+</div>
+
+<script>
+function todayAU() {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function buildRows() {
+  let r = "";
+  for (let i = 1; i <= 10; i++) {
+    r += `
+    <tr>
+      <td class="no">${i}</td>
+      <td><input></td>
+      <td><input></td>
+      <td><input></td>
+      <td><input></td>
+      <td><input></td>
+      <td><input></td>
+    </tr>`;
+  }
+  return r;
+}
+
+function buildForm() {
+  const today = todayAU();
+
+  return `
+  <div class="form">
+
+    <div class="header-box">
+      <div class="header-labels">
+        Date<br>
+        CE Code
+      </div>
+      <div class="header-fields">
+        <input value="${today}">
+        <input placeholder="CE Code">
+      </div>
+    </div>
+
+    <table>
+      <colgroup>
+        <col class="c-no">
+        <col class="c-ce">
+        <col class="c-part">
+        <col class="c-qty">
+        <col class="c-rico">
+        <col class="c-awb">
+        <col class="c-child">
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th>
+          <th>CE Tag</th>
+          <th>Part Number</th>
+          <th>Qty</th>
+          <th>RICO Tag</th>
+          <th>TOLL AWB</th>
+          <th>Child Connote number</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${buildRows()}
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <div class="sig-label">Pick-up driver Fleet#, Name and signature</div>
+      <div class="sigbox">
+        <input placeholder="Type here">
+      </div>
+    </div>
+
+  </div>`;
+}
+
+document.getElementById("topHalf").innerHTML = buildForm();
+document.getElementById("bottomHalf").innerHTML = buildForm();
+</script>
+
+</body>
+</html>
